@@ -28,7 +28,8 @@ export function connect<N>(ns: N): Function {
                 const reducer = (state = result, {type, payload}) => {
                     if (mutations[type]) {
                         const curr = {...state};
-                        return mutations[type].bind(curr)(payload) || curr;
+                        state = mutations[type].bind(curr)(payload) || curr;
+                        (<any>Object).assign(result, state)
                     }
                     return state;
                 };

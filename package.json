@@ -1,6 +1,6 @@
 {
   "name": "react-deliverer",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "react deliverer redux 模块化 拯救者",
   "author": "sampsonli",
   "keywords": [
@@ -27,6 +27,6 @@
   },
   "devDependencies": {
     "typescript": "^3.5.2",
-    "redux": ">=2.0.0"
+    "redux": "^2.0.0"
   }
 }
