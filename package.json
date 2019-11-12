@@ -1,6 +1,6 @@
 {
   "name": "react-deliverer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "react deliverer redux 模块化 拯救者",
   "author": "sampsonli",
   "keywords": [
@@ -11,7 +11,7 @@
     "按需加载",
     "模块化"
   ],
-  "homepage": "https://github.com/sampsonli/react_spirits",
+  "homepage": "https://github.com/sampsonli/react_deliverer",
   "license": "MIT",
   "scripts": {
     "build": "tsc"
