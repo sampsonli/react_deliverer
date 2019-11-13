@@ -59,6 +59,7 @@ export default new HomeStore();
 ~~~
 5. 使用deliverer
 ~~~jsx harmony
+import store from '../store';
 // 可以写成 基于function组件
 class Home extends Component {
     render() {
@@ -68,7 +69,7 @@ class Home extends Component {
                 <div className={css.header}>
                     <div className={css['h-ct']} onClick={() => store.getNumber()}>
                         <i className={css['h-back']} />
-                        <span className={css['h-title']}>漫话历史4-{number}</span>
+                        <span className={css['h-title']}>漫话历史-{number}</span>
                     </div>
                 </div>
                 <div className="l-flex-1 l-relative">
@@ -89,9 +90,6 @@ class Home extends Component {
         );
     }
 }
-Home.propTypes = {
-    location: PropTypes.objectOf(PropTypes.any).isRequired,
-};
 export default connect(state => ({state: state[store.ns]}))(Home);
 
 ~~~
