@@ -29,14 +29,19 @@ export function connect<N>(ns: N): Function {
                     if (mutations[type]) {
                         const curr = {...state};
                         state = mutations[type].bind(curr)(payload) || curr;
-                        (<any>Object).assign(result, state);
+                        for(let key in state) {
+                            result[key] = state[key];
+                        }
                     }
                     return state;
                 };
                 injectReducer(ns, reducer);
                 const rootState = _store.getState();
-                if(rootState[ns]) {
-                    (<any>Object).assign(result, rootState[ns])
+                const state = rootState[ns];
+                if(state) { // 老数据同步进去
+                    for(let key in state) {
+                        result[key] = state[key];
+                    }
                 }
                 return result;
 
