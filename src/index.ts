@@ -21,21 +21,23 @@ export function connect<N>(ns: N): Function {
                 const result = new clazz();
                 result.ns = ns;
                 const actions = clazz.prototype.__actions || {};
-                const mutations = {}
+                const mutations = {};
                 Object.keys(actions).forEach(func => {
                     mutations[`${ns}/${func}`] = actions[func]
-                })
-                const reducer = (state = result, {type, payload}) => {
+                });
+                const reducer = (state = JSON.parse(JSON.stringify(result)), {type, payload}) => {
                     if (mutations[type]) {
                         const curr = {...state};
                         state = mutations[type].bind(curr)(payload) || curr;
-                        (<any>Object).assign(result, state)
+                        (<any>Object).assign(result, state);
                     }
                     return state;
                 };
                 injectReducer(ns, reducer);
-
-
+                const rootState = _store.getState();
+                if(rootState[ns]) {
+                    (<any>Object).assign(result, rootState[ns])
+                }
                 return result;
 
 
@@ -43,7 +45,7 @@ export function connect<N>(ns: N): Function {
 
         }
     } else {
-        throw new Error('spirits 未初始化, 请先调用 spirits(store)')
+        throw new Error('deliverer 未初始化, 请先调用 deliverer(store)')
     }
 
 
