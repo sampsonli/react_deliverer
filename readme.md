@@ -95,3 +95,13 @@ Home.propTypes = {
 export default connect(state => ({state: state[store.ns]}))(Home);
 
 ~~~
+
+### 说明
+1. action 
+    > action 修饰的方法会修改原方法， 所修饰的方法不能是箭头方法，因为箭头无法无法注入this
+    > 除了action修饰的方法， 其他方法建议使用箭头方法， action修饰的方法只能传一个参数， 如果要传多个的花， 可以考虑解构赋值
+2. connect
+    > connect 注解必须传一字符串，而且全局唯一， 否则可能导致未知异常
+3. 使用deliverer 前必须注入 store， 否则无法使用全部功能
+4. 组件中使用deliverer提供的数据，可以使用props 传过来的， 也可以直接使用模块导出来的数据
+
