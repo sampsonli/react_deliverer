@@ -104,4 +104,7 @@ export default connect(state => ({state: state[store.ns]}))(Home);
     > connect 注解必须传一字符串，而且全局唯一， 否则可能导致未知异常
 3. 使用deliverer 前必须注入 store， 否则无法使用全部功能
 4. 组件中使用deliverer提供的数据，可以使用props 传过来的， 也可以直接使用模块导出来的数据
+5. 相关使用方法可以参考
+    1. [reactwithie8](https://github.com/sampsonli/reactwithie8)
 
+    2. [reactwebpack4](https://github.com/sampsonli/reactwebpack4/tree/feature_deliverer)
