@@ -1,4 +1,4 @@
-const {connect} = require('../lib/index')
+import {connect} from './index'
 
 class Test {
     name = 'lichun'

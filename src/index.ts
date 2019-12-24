@@ -33,10 +33,10 @@ export function connect<N>(ns: N): Function {
             const reducer = (state = JSON.parse(JSON.stringify(result)), {type, payload}) => {
                 if (mutations[type]) {
                     const curr = {...state};
-                    const modify = mutations[type].bind(curr)(payload, curr) || curr;
-                    const diff = Object.keys(modify).some(key => modify[key] !== state[key]);
+                    mutations[type].bind(curr)(payload, curr);
+                    const diff = Object.keys(curr).some(key => curr[key] !== state[key]);
                     if(diff) {
-                        state = modify;
+                        state = curr;
                         for (let key in state) {
                             result[key] = state[key];
                         }
@@ -44,14 +44,14 @@ export function connect<N>(ns: N): Function {
                 }
                 return state;
             };
-            injectReducer(ns, reducer);
-            const rootState = _store.getState();
+            const rootState = _store.getState() || {};
             const state = rootState[ns];
             if (state) { // 老数据同步进去
                 for (let key in state) {
                     result[key] = state[key];
                 }
             }
+            injectReducer(ns, reducer);
             Object.keys(clazz.prototype).forEach(key => {
                 if(typeof clazz.prototype[key] === "function" && !actions[key]) {
                     const origin = clazz.prototype[key];
@@ -61,7 +61,7 @@ export function connect<N>(ns: N): Function {
                         origin.bind({...result, ...state})(...args);
                     }
                 }
-            })
+            });
             return result;
         }
 
@@ -83,6 +83,6 @@ export function action(clazz, act) {
 }
 
 export default (store, asyncReducers = {}) => {
-    _store = store
+    _store = store;
     _asyncReducers = asyncReducers
 };
