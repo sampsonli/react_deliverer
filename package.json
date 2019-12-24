@@ -1,6 +1,6 @@
 {
   "name": "react-deliverer",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "react deliverer redux 模块化 拯救者",
   "author": "sampsonli",
   "keywords": [
@@ -14,7 +14,8 @@
   "homepage": "https://github.com/sampsonli/react_deliverer",
   "license": "MIT",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "tsc ./src/test.spec.ts"
   },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

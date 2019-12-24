@@ -37,7 +37,7 @@ deliverer(store, asyncReducers); // asyncReducers是老版本维护的所有redu
 import {connect, action} from 'react-deliverer';
 
 @connect('demo_home')
-class HomeStore {
+class HomeModel {
     number = 0;
 
     @action
@@ -54,16 +54,16 @@ class HomeStore {
         }, 300);
     }
 }
-export default new HomeStore();
+export default new HomeModel();
 
 ~~~
 5. 使用deliverer
 ~~~jsx harmony
-import store from '../store';
+import model from '../model/homeModel';
 // 可以写成 基于function组件
 class Home extends Component {
     render() {
-        const {number} = store;
+        const {number} = this.props.data;
         return (
             <div className={classNames('l-full l-flex-column', css.container)}>
                 <div className={css.header}>
@@ -90,7 +90,7 @@ class Home extends Component {
         );
     }
 }
-export default connect(state => ({state: state[store.ns]}))(Home);
+export default connect(state => ({data: state[model.ns]}))(Home);
 
 ~~~
 
@@ -101,8 +101,7 @@ export default connect(state => ({state: state[store.ns]}))(Home);
 2. connect
     > connect 注解必须传一字符串，而且全局唯一， 否则可能导致未知异常
 3. 使用deliverer 前必须注入 store， 否则无法使用全部功能
-4. 组件中使用deliverer提供的数据，可以使用props 传过来的， 也可以直接使用模块导出来的数据
-5. 相关使用方法可以参考
+4. 相关使用方法可以参考
     1. [reactwithie8](https://github.com/sampsonli/reactwithie8)
 
     2. [reactwebpack4](https://github.com/sampsonli/reactwebpack4/tree/feature_deliverer)

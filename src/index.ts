@@ -21,14 +21,15 @@ function injectReducer(key, reducer) {
 
 export function connect<N>(ns: N): Function {
     return function (clazz) { // 注入 clazz 代表目标类
-        return function () {  // 构造函数, 返回新的类
-            const result = new clazz();
-            result.ns = ns;
-            const actions = clazz.prototype.__actions || {};
-            const mutations = {};
-            Object.keys(actions).forEach(func => {
-                mutations[`${ns}/${func}`] = actions[func]
-            });
+        clazz.prototype.ns = ns;
+        const actions = clazz.prototype.__actions || {};
+        delete clazz.prototype.__actions;
+        const mutations = {};
+        Object.keys(actions).forEach(func => {
+            mutations[`${ns}/${func}`] = actions[func]
+        });
+        return function (...args) {  // 构造函数, 返回新的类
+            const result = new clazz(...args);
             const reducer = (state = JSON.parse(JSON.stringify(result)), {type, payload}) => {
                 if (mutations[type]) {
                     const curr = {...state};
@@ -51,6 +52,16 @@ export function connect<N>(ns: N): Function {
                     result[key] = state[key];
                 }
             }
+            Object.keys(clazz.prototype).forEach(key => {
+                if(typeof clazz.prototype[key] === "function" && !actions[key]) {
+                    const origin = clazz.prototype[key];
+                    clazz.prototype[key] = function (...args) {
+                        const rootState = _store.getState();
+                        const state = rootState[ns];
+                        origin.bind({...result, ...state})(...args);
+                    }
+                }
+            })
             return result;
         }
 
@@ -66,7 +77,7 @@ export function action(clazz, act) {
         clazz.__actions = {[act]: clazz[act]}
     }
     clazz[act] = function (payload) {
-        _store.dispatch({type: this.ns + "/" + act, payload: payload});
+        _store.dispatch({type: clazz.ns + "/" + act, payload: payload});
     };
     return clazz[act]
 }
