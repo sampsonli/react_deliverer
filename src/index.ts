@@ -29,6 +29,9 @@ export function connect(ns:string = ''): Function {
             const mutations = {};
             // 容许在外面更改ns
             ns = result.ns || ns;
+            clazz.prototype.ns = ns;
+            delete result.ns;
+
             Object.keys(actions).forEach(func => {
                 mutations[`${ns}/${func}`] = actions[func]
             });
