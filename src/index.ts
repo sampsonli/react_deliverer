@@ -24,11 +24,13 @@ export function connect<N>(ns: N): Function {
         clazz.prototype.ns = ns;
         const actions = clazz.prototype.__actions || {};
         delete clazz.prototype.__actions;
-        const mutations = {};
-        Object.keys(actions).forEach(func => {
-            mutations[`${ns}/${func}`] = actions[func]
-        });
         return function (...args) {  // 构造函数, 返回新的类
+            const mutations = {};
+            // 容许在外面更改ns
+            ns = clazz.prototype.ns;
+            Object.keys(actions).forEach(func => {
+                mutations[`${ns}/${func}`] = actions[func]
+            });
             const result = new clazz(...args);
             const reducer = (state = JSON.parse(JSON.stringify(result)), {type, payload}) => {
                 if (mutations[type]) {
@@ -58,7 +60,7 @@ export function connect<N>(ns: N): Function {
                     clazz.prototype[key] = function (...args) {
                         const rootState = _store.getState();
                         const state = rootState[ns];
-                        origin.bind({...result, ...state})(...args);
+                        origin.bind({...clazz.prototype, ...state})(...args);
                     }
                 }
             });
