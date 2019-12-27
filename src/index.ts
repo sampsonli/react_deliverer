@@ -19,19 +19,19 @@ function injectReducer(key, reducer) {
 }
 
 
-export function connect<N>(ns: N): Function {
+export function connect(ns:string = ''): Function {
     return function (clazz) { // 注入 clazz 代表目标类
         clazz.prototype.ns = ns;
         const actions = clazz.prototype.__actions || {};
         delete clazz.prototype.__actions;
         return function (...args) {  // 构造函数, 返回新的类
+            const result = new clazz(...args);
             const mutations = {};
             // 容许在外面更改ns
-            ns = clazz.prototype.ns;
+            ns = result.ns || ns;
             Object.keys(actions).forEach(func => {
                 mutations[`${ns}/${func}`] = actions[func]
             });
-            const result = new clazz(...args);
             const reducer = (state = JSON.parse(JSON.stringify(result)), {type, payload}) => {
                 if (mutations[type]) {
                     const curr = {...state};

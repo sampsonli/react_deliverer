@@ -46,7 +46,7 @@ class HomeModel {
         this.number = number;
     }
 
-    getNumber = () => {
+    getNumber(){
         console.log(this.number); // 获取实例字段
         // 模拟接口请求数据
         setTimeout(() => {
