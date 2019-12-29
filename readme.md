@@ -34,13 +34,13 @@ deliverer(store, asyncReducers); // asyncReducers是老版本维护的所有redu
 ~~~
 4. 定义model
 ~~~javascript
-import {deliver, reducer} from 'react-deliverer';
+import {deliver, mutate} from 'react-deliverer';
 
 @deliver('demo_home')
 class HomeModel {
     number = 0;
 
-    @reducer
+    @mutate
     setNumber(number) {
         // console.log('----1233344');
         this.number = number;
@@ -95,9 +95,9 @@ export default connect(state => ({data: state[model.ns]}))(Home);
 ~~~
 
 ### 说明
-1. reducer 
-    > reducer 修饰的方法会修改原方法， 所修饰的方法不能是箭头方法，因为箭头无法无法注入this
-    > reducer修饰的方法只能传一个参数， 如果要传多个的花， 可以考虑解构赋值
+1. mutate 
+    > mutate 修饰的方法会修改原方法， 所修饰的方法不能是箭头方法，因为箭头无法无法注入this
+    > mutate 修饰的方法只能传一个参数， 如果要传多个的花， 可以考虑解构赋值
 2. deliver
     > deliver 注解必须传一字符串，而且全局唯一， 否则可能导致未知异常
 3. 使用deliverer 前必须注入 store， 否则无法使用全部功能
