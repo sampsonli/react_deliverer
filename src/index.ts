@@ -75,7 +75,7 @@ export function deliver(ns:string = ''): Function {
 
 }
 
-export function reducer(clazz, act) {
+export function mutate(clazz, act) {
     if (clazz.__actions) {
         clazz.__actions[act] = clazz[act]
     } else {
