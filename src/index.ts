@@ -19,7 +19,7 @@ function injectReducer(key, reducer) {
 }
 
 
-export function connect(ns:string = ''): Function {
+export function deliver(ns:string = ''): Function {
     return function (clazz) { // 注入 clazz 代表目标类
         clazz.prototype.ns = ns;
         const actions = clazz.prototype.__actions || {};
@@ -75,7 +75,7 @@ export function connect(ns:string = ''): Function {
 
 }
 
-export function action(clazz, act) {
+export function reducer(clazz, act) {
     if (clazz.__actions) {
         clazz.__actions[act] = clazz[act]
     } else {
