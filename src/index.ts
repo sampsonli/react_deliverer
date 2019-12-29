@@ -1,14 +1,14 @@
 import {combineReducers} from 'redux';
 
-declare const module;
+// declare const module;
 let _store = undefined;
 let _asyncReducers = {};
 
 function injectReducer(key, reducer) {
     if (_store) {
-        if (_asyncReducers[key] && !module.hot) {
+        /*if (_asyncReducers[key] && !module.hot) {
             console.error('模块命名重复，可能会引发未知错误');
-        }
+        }*/
         _asyncReducers[key] = reducer;
         _store.replaceReducer(combineReducers({
             ..._asyncReducers,
