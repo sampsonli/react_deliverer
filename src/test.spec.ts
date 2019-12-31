@@ -1,4 +1,4 @@
-import {connect} from './index'
+import {deliver} from './index'
 
 class Test {
     name = 'lichun'
@@ -7,6 +7,6 @@ class Test {
     }
 
 }
-const T = connect('hello')(Test)
+const T = deliver('hello')(Test)
 const test = new T();
 console.log(test.getName())

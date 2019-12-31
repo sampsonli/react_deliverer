@@ -37,7 +37,10 @@ export function deliver(ns: string = ''): Function {
 
                     const rootState = _store.getState();
                     let state = rootState[clazz.prototype.ns];
-                    const _this = {...state};
+                    const _this = Object.create(clazz.prototype);
+                    for(let key in state) {
+                        _this[key] = state[key];
+                    }
                     if (origin.prototype.toString() === '[object Generator]') {
                         const runGen = (ge, val) => {
                             const tmp = ge.next(val);
@@ -75,6 +78,11 @@ export function deliver(ns: string = ''): Function {
             ns = result.ns || ns;
             clazz.prototype.ns = ns;
             delete result.ns;
+            Object.keys(result).some(key => {
+                if(typeof result[key] === 'function') {
+                    throw new Error('not allow arrow function')
+                }
+            });
 
             const reducer = (state = JSON.parse(JSON.stringify(result)), {type, payload}) => {
                 if (type === ns + "/update") {
@@ -83,7 +91,7 @@ export function deliver(ns: string = ''): Function {
                 return state;
             };
             injectReducer(ns, reducer);
-            return result;
+            return Object.create(clazz.prototype);
         }
 
     }
