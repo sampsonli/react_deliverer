@@ -36,7 +36,7 @@ export function deliver(ns: string = ''): Function {
                 clazz.prototype[key] = function (...args) {
 
                     const rootState = _store.getState();
-                    let state = rootState[ns];
+                    let state = rootState[clazz.prototype.ns];
                     const _this = {...state};
                     if (origin.prototype.toString() === '[object Generator]') {
                         const runGen = (ge, val) => {
@@ -45,8 +45,10 @@ export function deliver(ns: string = ''): Function {
                             state = {..._this};
                             if (tmp.done) {
                                 return tmp.value
-                            } else {
+                            } else if(tmp.value.then) {
                                 return tmp.value.then(data => runGen(ge, data)).catch(e => ge.throw(e))
+                            } else {
+                                runGen(ge, tmp.value)
                             }
                         };
                         return runGen(origin.bind(_this)(...args), null)
@@ -60,6 +62,11 @@ export function deliver(ns: string = ''): Function {
                 }
             }
         });
+
+        clazz.prototype.useData = () => {
+            const rootState = _store.getState();
+            return  rootState[clazz.prototype.ns];
+        }
 
 
         return function (...args) {  // 构造函数, 返回新的类
