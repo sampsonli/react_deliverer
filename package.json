@@ -29,8 +29,5 @@
   "devDependencies": {
     "redux": "^2.0.0",
     "typescript": "^3.5.2"
-  },
-  "dependencies": {
-    "co": "^4.6.0"
   }
 }
