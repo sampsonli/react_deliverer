@@ -34,74 +34,63 @@ deliverer(store, asyncReducers); // asyncReducers是老版本维护的所有redu
 ~~~
 4. 定义model
 ~~~javascript
-import {deliver, mutate} from 'react-deliverer';
+import {deliver} from 'react-deliverer';
 
-@deliver('demo_home')
-class HomeModel {
-    number = 0;
-
-    @mutate
-    setNumber(number) {
-        // console.log('----1233344');
-        this.number = number;
-    }
-
-    getNumber(){
-        console.log(this.number); // 获取实例字段
-        // 模拟接口请求数据
+function wait(time) {
+    return new Promise((resolve) => {
         setTimeout(() => {
-            this.setNumber(Math.floor(Math.random() * 1000));
-        }, 300);
+            resolve(999999);
+        }, time);
+    });
+}
+
+@deliver('demo1_home')
+class HomeModel {
+    loading = false;
+    data = null;
+    * getData() {
+        this.loading = true;
+        const data = yield wait(2000);
+        this.data = data;
+        this.loading = false;
     }
 }
 export default new HomeModel();
-
 ~~~
 5. 使用deliverer
 ~~~jsx harmony
-import model from '../model/homeModel';
-// 可以写成 基于function组件
-class Home extends Component {
-    render() {
-        const {number} = this.props.data;
-        return (
-            <div className={classNames('l-full l-flex-column', css.container)}>
-                <div className={css.header}>
-                    <div className={css['h-ct']} onClick={model.getNumber}>
-                        <i className={css['h-back']} />
-                        <span className={css['h-title']}>漫话历史-{number}</span>
-                    </div>
-                </div>
-                <div className="l-flex-1 l-relative">
-                    <div className={css['time-line']} />
-                    <div className="l-full l-scroll-y">
-                        <ul>
-                            <li className={classNames(css.item, css.period)}>
-                                <div><i className={css.logo_01} />
-                                    <span className={css['l-title']}>春秋战国</span>
-                                    <span className={css['s-title']}>公元前770年—公元前221年22222444</span>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+import {connect} from 'react-redux';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';
+import css from './style.less';
+import model from '../../models';
 
+class Home extends Component {
+    componentDidMount() {
+        model.getData();
+    }
+    render() {
+        const {data} = this.props;
+        return (
+            <div className={css.container}>
+                --{data.data}-
             </div>
         );
     }
 }
+Home.propTypes = {
+    history: PropTypes.shape({push: PropTypes.func}).isRequired,
+    data: PropTypes.objectOf(PropTypes.any).isRequired,
+};
 export default connect(state => ({data: state[model.ns]}))(Home);
 
 ~~~
 
 ### 说明
-1. mutate 
-    > mutate 修饰的方法会修改原方法， 所修饰的方法不能是箭头方法，因为箭头无法无法注入this
-    > mutate 修饰的方法只能传一个参数， 如果要传多个的花， 可以考虑解构赋值
-2. deliver
+1. deliver
     > deliver 注解必须传一字符串，而且全局唯一， 否则可能导致未知异常
-3. 使用deliverer 前必须注入 store， 否则无法使用全部功能
-4. 相关使用方法可以参考
+2. 使用deliverer 前必须注入 store， 否则无法使用全部功能
+3. 相关使用方法可以参考
     1. [reactwithie8](https://github.com/sampsonli/reactwithie8)
 
     2. [reactwebpack4](https://github.com/sampsonli/reactwebpack4/tree/feature_deliverer)
