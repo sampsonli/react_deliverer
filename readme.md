@@ -94,3 +94,5 @@ export default connect(state => ({data: state[model.ns]}))(Home);
     1. [reactwithie8](https://github.com/sampsonli/reactwithie8)
 
     2. [reactwebpack4](https://github.com/sampsonli/reactwebpack4/tree/feature_deliverer)
+### 附加说明
+>使用react-deliverer/lib/import_async babel插件 配合react 热加载有更多惊喜， 请关注后续更新

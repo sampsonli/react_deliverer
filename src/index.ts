@@ -30,8 +30,8 @@ export function deliver(ns: string = ''): Function {
             }
         }
 
-        Object.keys(clazz.prototype).forEach(key => {
-            if (typeof clazz.prototype[key] === "function") {
+        Object.getOwnPropertyNames(clazz.prototype).forEach(key => {
+            if (key !== 'constructor' && typeof clazz.prototype[key] === "function") {
                 const origin = clazz.prototype[key];
                 clazz.prototype[key] = function (...args) {
 
