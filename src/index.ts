@@ -1,4 +1,5 @@
 import {combineReducers} from 'redux';
+import {useState, useEffect} from 'react';
 
 // declare const module;
 let _store;
@@ -24,6 +25,7 @@ export function deliver(ns: string = ''): Function {
         const map = {};
         const mapReverse = {};
         Clazz.prototype.ns = ns;
+
         // const map = Object.getOwnPropertyNames()
 
         function doUpdate(newState, oldState) {
@@ -56,7 +58,8 @@ export function deliver(ns: string = ''): Function {
                             _state = {..._this};
                             if (tmp.done) {
                                 return tmp.value;
-                            } if (tmp.value.then) {
+                            }
+                            if (tmp.value.then) {
                                 return tmp.value.then(data => runGen(ge, data)).catch(e => ge.throw(e));
                             }
                             runGen(ge, tmp.value);
@@ -70,9 +73,23 @@ export function deliver(ns: string = ''): Function {
             }
         });
 
-        Clazz.prototype.useData = () => {
-            const rootState = _store.getState();
-            return rootState[Clazz.prototype.ns];
+        Clazz.prototype.useData = function () {
+            if (useState && useEffect) {
+                const [data, setData] = useState();
+                useEffect(() => {
+                    return _store.subscribe(() => {
+                        const rootState = _store.getState();
+                        setData(rootState[Clazz.prototype.ns])
+                    });
+                }, []);
+                if (!data) {
+                    const rootState = _store.getState();
+                    return rootState[Clazz.prototype.ns]
+                }
+                return data
+            } else {
+                throw new Error('Your react version is too lower, please upgrade newest version!')
+            }
         };
 
 
@@ -85,7 +102,7 @@ export function deliver(ns: string = ''): Function {
 
             const initState = {};
             Object.getOwnPropertyNames(result).forEach(key => {
-                const prop = key.split('_').reverse()[0];
+                const prop = key.split(/_\d+_/).reverse()[0];
                 map[prop] = key;
                 mapReverse[key] = prop;
                 initState[prop] = result[key];
