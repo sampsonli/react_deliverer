@@ -1,38 +1,35 @@
 import {combineReducers} from 'redux';
 import {useState, useEffect} from 'react';
 
-// declare const module;
 let _store;
 let _asyncReducers = {};
 
 function injectReducer(key, reducer) {
     if (_store) {
-        /* if (_asyncReducers[key] && !module.hot) {
-            console.error('模块命名重复，可能会引发未知错误');
-        } */
         _asyncReducers[key] = reducer;
         _store.replaceReducer(combineReducers({
             ..._asyncReducers,
         }));
     } else {
-        throw new Error('deliverer 未初始化, 请先调用 deliverer(store)');
+        throw new Error('deliverer not initialize, please invoke "deliverer(store)"');
     }
 }
 
-
 export function deliver(ns: string = ''): Function {
-    return function (Clazz) { // 注入 clazz 代表目标类
+    return function (Clazz) {
         const map = {};
         const mapReverse = {};
         Clazz.prototype.ns = ns;
-
-        // const map = Object.getOwnPropertyNames()
 
         function doUpdate(newState, oldState) {
             const diff = Object.keys(newState).some(key => newState[key] !== oldState[key]);
             if (diff) {
                 const _newState = {};
                 Object.keys(newState).forEach(key => {
+                    if(!mapReverse[key]) { // add new props
+                        mapReverse[key] = key;
+                        map[key] = key
+                    }
                     _newState[mapReverse[key]] = newState[key];
                 });
                 _store.dispatch({type: `${Clazz.prototype.ns}/update`, payload: _newState});
@@ -50,7 +47,7 @@ export function deliver(ns: string = ''): Function {
                     Object.keys(state).forEach(_key => {
                         _this[map[_key]] = state[_key];
                         _state[map[_key]] = state[_key];
-                    })
+                    });
                     if (origin.prototype.toString() === '[object Generator]') {
                         const runGen = (ge, val) => {
                             const tmp = ge.next(val);
@@ -93,16 +90,16 @@ export function deliver(ns: string = ''): Function {
         };
 
 
-        return function (...args) { // 构造函数, 返回新的类
+        return function (...args) { // constructor
             const result = new Clazz(...args);
-            // 容许在外面更改ns
+            // allow modify ns in instance
             ns = result.ns || ns;
             Clazz.prototype.ns = ns;
             delete result.ns;
 
             const initState = {};
             Object.getOwnPropertyNames(result).forEach(key => {
-                const prop = key.split(/_\d+_/).reverse()[0];
+                const prop = key.split(/_\d+_/).reverse()[0]; // convert private property
                 map[prop] = key;
                 mapReverse[key] = prop;
                 initState[prop] = result[key];
