@@ -15,97 +15,94 @@ function injectReducer(key, reducer) {
     }
 }
 
-export function deliver(ns: string|Function): Function {
+export function deliver(namespace: string|Function): Function {
     const Target =  function (Clazz) {
-        const map = {};
-        const mapReverse = {};
-        Clazz.prototype.ns = ns;
-
-        function doUpdate(newState, oldState) {
-            const diff = Object.keys(newState).some(key => newState[key] !== oldState[key]);
-            if (diff) {
-                const _newState = {};
-                Object.keys(newState).forEach(key => {
-                    if(!mapReverse[key]) { // add new props
-                        mapReverse[key] = key;
-                        map[key] = key
-                    }
-                    _newState[mapReverse[key]] = newState[key];
-                });
-                _store.dispatch({type: `${Clazz.prototype.ns}/update`, payload: _newState});
-            }
-        }
-
-        Object.getOwnPropertyNames(Clazz.prototype).forEach(key => {
-            if (key !== 'constructor' && typeof Clazz.prototype[key] === 'function') {
-                const origin = Clazz.prototype[key];
-                Clazz.prototype[key] = function (...args) {
-                    const rootState = _store.getState();
-                    const state = rootState[Clazz.prototype.ns];
-                    const _this = Object.create(Clazz.prototype);
-                    let _state = {};
-                    Object.keys(state).forEach(_key => {
-                        _this[map[_key]] = state[_key];
-                        _state[map[_key]] = state[_key];
-                    });
-                    if (origin.prototype.toString() === '[object Generator]') {
-                        const runGen = (ge, val) => {
-                            const tmp = ge.next(val);
-                            doUpdate(_this, _state);
-                            _state = {..._this};
-                            if (tmp.done) {
-                                return tmp.value;
-                            }
-                            if (tmp.value.then) {
-                                return tmp.value.then(data => runGen(ge, data)).catch(e => ge.throw(e));
-                            }
-                            runGen(ge, tmp.value);
-                        };
-                        return runGen(origin.bind(_this)(...args), null);
-                    }
-                    const result = origin.bind(_this)(...args);
-                    doUpdate(_this, _state);
-                    return result;
-                };
-            }
-        });
-
-        Clazz.prototype.useData = function () {
-            if (useState && useEffect) {
-                const [data, setData] = useState();
-                useEffect(() => {
-                    return _store.subscribe(() => {
-                        const rootState = _store.getState();
-                        setData(rootState[Clazz.prototype.ns])
-                    });
-                }, []);
-                if (!data) {
-                    const rootState = _store.getState();
-                    return rootState[Clazz.prototype.ns]
-                }
-                return data
-            } else {
-                throw new Error('Your react version is too lower, please upgrade newest version!')
-            }
-        };
-
-
         return function (...args) { // constructor
-            const result = new Clazz(...args);
-            // allow modify ns in instance
-            ns = result.ns || ns;
+            const instance = new Clazz(...args);
+            const ns = instance.ns || namespace;
             if(!ns) {
                 throw new Error("please define 'ns' before")
             }
-            Clazz.prototype.ns = ns;
-            delete result.ns;
+            delete instance.ns;
+            const map = {};
+            const mapReverse = {};
+
+            function doUpdate(newState, oldState) {
+                const diff = Object.keys(newState).some(key => newState[key] !== oldState[key]);
+                if (diff) {
+                    const _newState = {};
+                    Object.keys(newState).forEach(key => {
+                        if(!mapReverse[key]) { // add new props
+                            mapReverse[key] = key;
+                            map[key] = key
+                        }
+                        _newState[mapReverse[key]] = newState[key];
+                    });
+                    _store.dispatch({type: `${ns}/update`, payload: _newState});
+                }
+            }
+
+            const prototype = Object.create(instance);
+            prototype.ns = ns;
+            Object.getOwnPropertyNames(Clazz.prototype).forEach(key => {
+                if (key !== 'constructor' && typeof Clazz.prototype[key] === 'function') {
+                    const origin = Clazz.prototype[key];
+                    prototype[key] = function (...params) {
+                        const rootState = _store.getState();
+                        const state = rootState[ns];
+                        const _this = Object.create(prototype);
+                        let _state = {};
+                        Object.keys(state).forEach(_key => {
+                            _this[map[_key]] = state[_key];
+                            _state[map[_key]] = state[_key];
+                        });
+                        if (origin.prototype.toString() === '[object Generator]') {
+                            const runGen = (ge, val) => {
+                                const tmp = ge.next(val);
+                                doUpdate(_this, _state);
+                                _state = {..._this};
+                                if (tmp.done) {
+                                    return tmp.value;
+                                }
+                                if (tmp.value.then) {
+                                    return tmp.value.then(data => runGen(ge, data)).catch(e => ge.throw(e));
+                                }
+                                runGen(ge, tmp.value);
+                            };
+                            return runGen(origin.bind(_this)(...params), null);
+                        }
+                        const result = origin.bind(_this)(...params);
+                        doUpdate(_this, _state);
+                        return result;
+                    };
+                }
+            });
+            prototype.useData = function () {
+                if (useState && useEffect) {
+                    const [data, setData] = useState();
+                    useEffect(() => {
+                        return _store.subscribe(() => {
+                            const rootState = _store.getState();
+                            setData(rootState[ns])
+                        });
+                    }, []);
+                    if (!data) {
+                        const rootState = _store.getState();
+                        return rootState[ns]
+                    }
+                    return data
+                } else {
+                    throw new Error('Your react version is too lower, please upgrade newest version!')
+                }
+            };
+
 
             const initState = {};
-            Object.getOwnPropertyNames(result).forEach(key => {
+            Object.getOwnPropertyNames(instance).forEach(key => {
                 const prop = key.split(/_\d+_/).reverse()[0]; // convert private property
                 map[prop] = key;
                 mapReverse[key] = prop;
-                initState[prop] = result[key];
+                initState[prop] = instance[key];
             });
             const reducer = (state = initState, {type, payload}) => {
                 if (type === `${ns}/update`) {
@@ -114,13 +111,11 @@ export function deliver(ns: string|Function): Function {
                 return state;
             };
             injectReducer(ns, reducer);
-            return result;
+            return Object.create(prototype);
         };
     };
-    if(typeof ns === "function") {
-        const Clazz = ns;
-        ns = '';
-        return Target(Clazz)
+    if(typeof namespace === "function") {
+        return Target(namespace)
     }
     return Target
 }
