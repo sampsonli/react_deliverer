@@ -15,8 +15,8 @@ function injectReducer(key, reducer) {
     }
 }
 
-export function deliver(ns: string = ''): Function {
-    return function (Clazz) {
+export function deliver(ns: string|Function): Function {
+    const Target =  function (Clazz) {
         const map = {};
         const mapReverse = {};
         Clazz.prototype.ns = ns;
@@ -94,6 +94,9 @@ export function deliver(ns: string = ''): Function {
             const result = new Clazz(...args);
             // allow modify ns in instance
             ns = result.ns || ns;
+            if(!ns) {
+                throw new Error("please define 'ns' before")
+            }
             Clazz.prototype.ns = ns;
             delete result.ns;
 
@@ -114,7 +117,14 @@ export function deliver(ns: string = ''): Function {
             return result;
         };
     };
+    if(typeof ns === "function") {
+        const Clazz = ns;
+        ns = '';
+        return Target(Clazz)
+    }
+    return Target
 }
+
 
 export default (store, asyncReducers = {}) => {
     _store = store;
