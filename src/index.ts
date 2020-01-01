@@ -83,7 +83,9 @@ export function deliver(namespace: string|Function): Function {
                     useEffect(() => {
                         return _store.subscribe(() => {
                             const rootState = _store.getState();
-                            setData(rootState[ns])
+                            if(rootState[ns] !== data) {
+                                setData(rootState[ns])
+                            }
                         });
                     }, []);
                     if (!data) {
