@@ -79,7 +79,7 @@ export function deliver(namespace: string|Function): Function {
             });
             prototype.useData = function (prop = null) {
                 if (useState && useEffect) {
-                    const [data, setData] = useState();
+                    const [data, setData] = useState('__UNINITED__');
                     useEffect(() => {
                         return _store.subscribe(() => {
                             const rootState = _store.getState();
@@ -90,11 +90,12 @@ export function deliver(namespace: string|Function): Function {
                                 return setData(prop(rootState[ns]))
                             }
                             if(typeof prop === 'string'){
-                                setData(rootState[ns][prop])
+                                return setData(rootState[ns][prop])
                             }
+                            setData(rootState[ns])
                         });
                     }, []);
-                    if (!data) {
+                    if (data === '__UNINITED__') {
                         const rootState = _store.getState();
                         if(!prop || !rootState[ns]) {
                             return rootState[ns]
