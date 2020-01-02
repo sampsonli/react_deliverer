@@ -77,24 +77,39 @@ export function deliver(namespace: string|Function): Function {
                     };
                 }
             });
-            prototype.useData = function () {
+            prototype.useData = function (prop = null) {
                 if (useState && useEffect) {
                     const [data, setData] = useState();
                     useEffect(() => {
                         return _store.subscribe(() => {
                             const rootState = _store.getState();
-                            if(rootState[ns] !== data) {
-                                setData(rootState[ns])
+                            if(!prop || !rootState[ns]) {
+                                return setData(rootState[ns])
+                            }
+                            if(typeof prop === 'function') {
+                                return setData(prop(rootState[ns]))
+                            }
+                            if(typeof prop === 'string'){
+                                setData(rootState[ns][prop])
                             }
                         });
                     }, []);
                     if (!data) {
                         const rootState = _store.getState();
+                        if(!prop || !rootState[ns]) {
+                            return rootState[ns]
+                        }
+                        if(typeof prop === 'function') {
+                            return prop(rootState[ns])
+                        }
+                        if(typeof prop === 'string'){
+                            return rootState[ns][prop]
+                        }
                         return rootState[ns]
                     }
                     return data
                 } else {
-                    throw new Error('Your react version is too lower, please upgrade newest version!')
+                    throw new Error('Your react version is too lower, please upgrade your react!')
                 }
             };
 
