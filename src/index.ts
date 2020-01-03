@@ -77,13 +77,15 @@ export function deliver(namespace: string|Function): Function {
                             return runGen(origin.bind(_this)(...params), null);
                         }
                         const state = _store.getState()[ns];
-                        const _state = {};
+                        let _state = {};
                         Object.keys(state).forEach(_key => {
                             _this[map[_key]] = state[_key];
                             _state[map[_key]] = state[_key];
                         });
                         const result = origin.bind(_this)(...params);
                         if(result && typeof result.then === 'function') {
+                            doUpdate(_this, _state);
+                            _state = {..._this};
                             return result.then(data => {
                                 doUpdate(_this, _state);
                                 return data;
