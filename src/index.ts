@@ -44,13 +44,15 @@ export function deliver(namespace: string|Function): Function {
 
             const prototype = Object.create(instance);
             prototype.ns = ns;
+            const _prototype = Object.create(instance);
+            _prototype.ns = ns;
             Object.getOwnPropertyNames(Clazz.prototype).forEach(key => {
                 if (key !== 'constructor' && typeof Clazz.prototype[key] === 'function') {
                     const origin = Clazz.prototype[key];
                     prototype[key] = function (...params) {
                         const rootState = _store.getState();
                         const state = rootState[ns];
-                        const _this = Object.create(prototype);
+                        let _this = Object.create(_prototype);
                         let _state = {};
                         Object.keys(state).forEach(_key => {
                             _this[map[_key]] = state[_key];
@@ -64,10 +66,12 @@ export function deliver(namespace: string|Function): Function {
                                 if (tmp.done) {
                                     return tmp.value;
                                 }
-                                if (tmp.value.then) {
-                                    return tmp.value.then(data => runGen(ge, data)).catch(e => ge.throw(e));
+                                if (tmp.value && tmp.value.then) {
+                                    return tmp.value.then(data => {
+                                        return runGen(ge, data)
+                                    }).catch(e => ge.throw(e));
                                 }
-                                runGen(ge, tmp.value);
+                                return runGen(ge, tmp.value);
                             };
                             return runGen(origin.bind(_this)(...params), null);
                         }
@@ -75,6 +79,11 @@ export function deliver(namespace: string|Function): Function {
                         doUpdate(_this, _state);
                         return result;
                     };
+                    if (origin.prototype.toString() === '[object Generator]') {
+                        _prototype[key] = prototype[key]
+                    } else {
+                        _prototype[key] = Clazz.prototype[key];
+                    }
                 }
             });
             prototype.useData = function (prop = null) {
