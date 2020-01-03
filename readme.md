@@ -55,7 +55,7 @@ class HomeModel {
         this.#running = true;
         this.#time = yield wait(1000);
         let i = 10;
-        while (this.i--) {
+        while (i--) {
             this.#time = yield wait(1000);
         }
         console.log('10s later');
