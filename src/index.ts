@@ -19,6 +19,9 @@ export function deliver(namespace: string|Function): Function {
     const Target =  function (Clazz) {
         return function (...args) { // constructor
             const instance = new Clazz(...args);
+            if(args && typeof args[0] === 'string') {
+                instance.ns = instance.ns || args[0];
+            }
             const ns = instance.ns || namespace;
             if(!ns) {
                 throw new Error("please define 'ns' before")
