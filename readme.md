@@ -140,9 +140,4 @@ export default Home;
     1. [reactwithie8](https://github.com/sampsonli/reactwithie8)
 
     2. [reactwebpack4](https://github.com/sampsonli/reactwebpack4/tree/feature_deliverer)
-    
-    
-### 遗留问题
-1. 目前model 中generator 方法调用当前model中generator中还有部分小问题，
- 被调用的generator里面的逻辑不能对model中的数据进行更新， 否则无法在调用的generator中同步数据（主要是this数据无法同步）， 可以在被调用的数据通过return 相关数据进行数据传递
 

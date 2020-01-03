@@ -50,19 +50,17 @@ export function deliver(namespace: string|Function): Function {
                 if (key !== 'constructor' && typeof Clazz.prototype[key] === 'function') {
                     const origin = Clazz.prototype[key];
                     prototype[key] = function (...params) {
-                        const rootState = _store.getState();
-                        const state = rootState[ns];
-                        let _this = Object.create(_prototype);
-                        let _state = {};
-                        Object.keys(state).forEach(_key => {
-                            _this[map[_key]] = state[_key];
-                            _state[map[_key]] = state[_key];
-                        });
+                        const _this = Object.create(_prototype);
                         if (origin.prototype.toString() === '[object Generator]') {
                             const runGen = (ge, val) => {
+                                const state = _store.getState()[ns];
+                                const _state = {};
+                                Object.keys(state).forEach(function (_key) {
+                                    _this[map[_key]] = state[_key];
+                                    _state[map[_key]] = state[_key];
+                                });
                                 const tmp = ge.next(val);
                                 doUpdate(_this, _state);
-                                _state = {..._this};
                                 if (tmp.done) {
                                     return tmp.value;
                                 }
@@ -75,6 +73,12 @@ export function deliver(namespace: string|Function): Function {
                             };
                             return runGen(origin.bind(_this)(...params), null);
                         }
+                        const state = _store.getState()[ns];
+                        const _state = {};
+                        Object.keys(state).forEach(_key => {
+                            _this[map[_key]] = state[_key];
+                            _state[map[_key]] = state[_key];
+                        });
                         const result = origin.bind(_this)(...params);
                         doUpdate(_this, _state);
                         return result;
