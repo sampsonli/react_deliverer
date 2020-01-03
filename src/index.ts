@@ -83,6 +83,12 @@ export function deliver(namespace: string|Function): Function {
                             _state[map[_key]] = state[_key];
                         });
                         const result = origin.bind(_this)(...params);
+                        if(result && typeof result.then === 'function') {
+                            return result.then(data => {
+                                doUpdate(_this, _state);
+                                return data;
+                            })
+                        }
                         doUpdate(_this, _state);
                         return result;
                     };
