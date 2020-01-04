@@ -11,14 +11,14 @@ react+redux 组合已经是目前主流开发模式， 但是使用原生redux�
 
 ### react-deliverer解决的问题
 1. 模块化
-2. 无需定义各种常量
-3. 无缝按需加载
-4. 使用简单
-5. 热更新
-6. 维护简单
-7. 使用ts开发， 拥有完善的自动代码提示
+2. 无需定义各种常量， 多个文件
+3. 模块无缝按需加载
+4. 完全基于面向对象思想，使用简单
+5. 完美支持异步操作
+6. 可读性强
+7. 完美支持ts开发， 拥有完善的自动代码提示
 8. 兼容老版本浏览器（保证react+redux版本同时支持）
-9. 热加载数据保留
+9. 热更新数据保留
 
 ## 使用方法
 1. 安装react-deliverer
@@ -34,12 +34,13 @@ deliverer(store, asyncReducers); // asyncReducers是老版本维护的所有redu
 ~~~
 4. 定义model
 ~~~javascript
+// 此demo无任何业务意义， 只是为了展示此库功能强大
 import {deliver} from 'react-deliverer';
 
-function wait(time) {  // 模拟http请求， 返回promise
+function wait(time) {
     return new Promise((resolve) => {
         setTimeout(() => {
-            resolve(new Date());
+            resolve(1);
         }, time);
     });
 }
@@ -48,18 +49,31 @@ function wait(time) {  // 模拟http请求， 返回promise
 class HomeModel {
     #running = false;
 
-    #time = new Date();
+    #time = 100;
 
-    * getTime() { // 模拟真实案例
-        if (this.#running) return;
-        this.#running = true;
-        this.#time = yield wait(1000);
-        let i = 10;
+    * setTime() {
+        let i = 20;
         while (i--) {
-            this.#time = yield wait(1000);
+            yield wait(100);
+            this.#time++;
         }
-        console.log('10s later');
-        this.#running = false;
+        return '新年快乐！';
+    }
+
+    * getTime() {
+        this.#time = 100;
+        const info = yield this.setTime();
+
+        let i = 50;
+        while (i--) {
+            yield wait(50);
+            this.#time--;
+        }
+        this.#time = info;
+    }
+
+    changeRunning() {
+        this.#running = true;
     }
 
     print() {
@@ -68,7 +82,7 @@ class HomeModel {
 }
 export default new HomeModel();
 
-~~~
+   ~~~
 5. 使用deliverer
 ~~~jsx harmony
 import {connect} from 'react-redux';
@@ -86,7 +100,7 @@ class Home extends Component {
         return (
             <div className={style.container}>
                 <div className={style.content}>
-                    {(data.loading && 'loading') || moment(data.time).format('新年好 HH:mm:ss')}
+                    2020年-{(data.time)}
                 </div>
             </div>
         );
@@ -104,7 +118,6 @@ export default connect(state => ({data: state[model.ns]}))(Home);
 ~~~jsx harmony
 import React, {useEffect} from 'react';
 import PropTypes from 'prop-types';
-import moment from 'moment';
 import {useLocation} from 'react-router-dom';
 import style from './style.less';
 import model from '../../models';
@@ -118,7 +131,8 @@ const Home = () => {
     return (
         <div className={style.container}>
             <div className={style.content}>
-                {(data.loading && 'loading') || moment(data.time).format('新年好 HH:mm:ss')}
+                2020年-
+                {(data.time)}
             </div>
 
         </div>
@@ -129,6 +143,7 @@ Home.propTypes = {
 };
 export default Home;
 
+
 ~~~
 
 ### 说明
@@ -136,8 +151,13 @@ export default Home;
     > deliver 注解必须传一字符串，而且全局唯一， 否则可能导致未知异常
 2. 使用deliverer 前必须注入 store， 否则无法使用全部功能
 3. model中方法不能为箭头方法， 否则this无法使用， 失去了本库的意义
-4. 相关使用方法可以参考
-    1. [reactwithie8](https://github.com/sampsonli/reactwithie8)
+4. 异步操作必须使用 generator语法，不能使用async/await, 否则无法实现精细化控制
+5. model 导出的useData 只能在高版本react中使用， 可以大大方便获取model中数据
+    * useData(arg), arg 可以为字符串（代表model中一个属性）， 可以是一个回调方法， 也可以不传（代表model中所有数据）
+6. 定义Model时， 里面属性建议用私有属性（es新语法）， 所有私有属性最后保持到store/state 中数据都是其原始属性比如
+    > “#time” => “time”
+7. 相关使用方法可以参考
+    1. [reactwithie8（兼容老版本浏览器版本）](https://github.com/sampsonli/reactwithie8)
 
-    2. [reactwebpack4](https://github.com/sampsonli/reactwebpack4/tree/feature_deliverer)
+    2. [reactwebpack4（现代浏览器版本）](https://github.com/sampsonli/reactwebpack4/tree/feature_deliverer)
 
