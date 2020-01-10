@@ -146,6 +146,9 @@ export function deliver(namespace: string|Function): Function {
                 mapReverse[key] = prop;
                 initState[prop] = instance[key];
             });
+            prototype.reset = function () {
+                _store.dispatch({type: `${ns}/update`, payload: initState});
+            };
             const reducer = (state = initState, {type, payload}) => {
                 if (type === `${ns}/update`) {
                     return payload;
