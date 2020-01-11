@@ -24,7 +24,7 @@ react+redux 组合已经是目前主流开发模式， 但是使用原生redux�
 相关使用方法可以参考
 
 1.  [reactwithie8（兼容老版本浏览器版本）](https://github.com/sampsonli/reactwithie8)
-2.  [reactwebpack4（现代浏览器版本）](https://github.com/sampsonli/reactwebpack4/tree/feature_deliverer)
+2.  [reactwebpack4（现代浏览器版本）](https://github.com/sampsonli/reactwebpack4)
 
 ## 快速开始
 > 实现一个简单的demo， 一个页面有两个按钮，一个点击+1， 一个点击-1，输出当前数字
@@ -66,7 +66,7 @@ export default new DemoModel();
 5. 使用deliverer
 >老版本react, 不支持react新api hooks
 
-~~~jsx
+~~~javascript
 import {connect} from 'react-redux';
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
@@ -338,9 +338,16 @@ class Demo2 {
 export default new Demo2();
 // 3. 
 @deliver
-class Demo2 {
+class Demo3 {
 }
-export default new Demo2('demo3');
+export default new Demo2('demo3'); // 底层已经帮你赋值了
+@deliver
+class Demo4 {
+    constructor(ns) {
+        this.ns = ns;
+    }
+}
+export default new Demo2('demo4');
 ~~~
 3. 模块实例方法/属性
 	1. ns 模块导出来具有ns属性， 值是模块命名空间名
@@ -348,4 +355,8 @@ export default new Demo2('demo3');
 		* selector 为空， 返回值是模块对应的state
 		* selector 为方法， selector 返回模块中的属性， 参数是当前模块
 		* selector 为字符串， 返回模块某个字段
-	3. reset() 辅助方法， 用来恢复当前模块默认值
+	3. reset() 辅助方法， 用来恢复当前模块初始值
+	
+### 最佳实践
+>react 组件/页面 开发基于function+hooks， 数据模型基于class， 而react-deliverer 是一款比较成熟的数据模型管理库， 解决了基于redux 开发一系列痛点。
+	

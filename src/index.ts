@@ -11,7 +11,7 @@ function injectReducer(key, reducer) {
             ..._asyncReducers,
         }));
     } else {
-        throw new Error('deliverer not initialize, please invoke "deliverer(store)"');
+        throw new Error('deliverer is not initialized, please invoke "deliverer(store)" before');
     }
 }
 
@@ -41,7 +41,7 @@ export function deliver(namespace: string|Function): Function {
                         }
                         _newState[mapReverse[key]] = newState[key];
                     });
-                    _store.dispatch({type: `${ns}/update`, payload: _newState});
+                    _store.dispatch({type: `deliver/${ns}`, payload: _newState});
                 }
             }
 
@@ -147,7 +147,7 @@ export function deliver(namespace: string|Function): Function {
                 initState[prop] = instance[key];
             });
             prototype.reset = function () {
-                _store.dispatch({type: `${ns}/update`, payload: initState});
+                _store.dispatch({type: `deliver/${ns}`, payload: initState});
             };
             const reducer = (state = initState, {type, payload}) => {
                 if (type === `${ns}/update`) {
