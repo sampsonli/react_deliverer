@@ -150,7 +150,7 @@ export function deliver(namespace: string|Function): Function {
                 _store.dispatch({type: `deliver/${ns}`, payload: initState});
             };
             const reducer = (state = initState, {type, payload}) => {
-                if (type === `${ns}/update`) {
+                if (type === `deliver/${ns}`) {
                     return payload;
                 }
                 return state;
