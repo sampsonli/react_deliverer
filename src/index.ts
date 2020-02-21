@@ -1,5 +1,6 @@
 import {combineReducers} from 'redux';
 import {useState, useEffect} from 'react';
+declare var Promise
 
 let _store;
 let _asyncReducers = {};
@@ -74,7 +75,7 @@ export function deliver(namespace: string|Function): Function {
                                 }
                                 return runGen(ge, tmp.value);
                             };
-                            return runGen(origin.bind(_this)(...params), null);
+                            return Promise.resolve().then(() => runGen(origin.bind(_this)(...params), null));
                         }
                         const state = _store.getState()[ns];
                         let _state = {};
