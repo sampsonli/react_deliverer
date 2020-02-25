@@ -71,7 +71,11 @@ export function deliver(namespace: string|Function): Function {
                                 if (tmp.value && tmp.value.then) {
                                     return tmp.value.then(data => {
                                         return runGen(ge, data)
-                                    }).catch(e => ge.throw(e));
+                                    }).catch(e => {
+                                        ge.throw(e);
+                                        doUpdate(_this, _state);
+                                        runGen(ge, null);
+                                    });
                                 }
                                 return runGen(ge, tmp.value);
                             };
