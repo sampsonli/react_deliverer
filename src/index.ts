@@ -56,30 +56,37 @@ export function deliver(namespace: string|Function): Function {
                     prototype[key] = function (...params) {
                         const _this = Object.create(_prototype);
                         if (origin.prototype.toString() === '[object Generator]') {
-                            const runGen = (ge, val) => {
+                            const runGen = (ge, val, isError, e) => {
                                 const state = _store.getState()[ns];
                                 const _state = {};
                                 Object.keys(state).forEach(function (_key) {
                                     _this[map[_key]] = state[_key];
                                     _state[map[_key]] = state[_key];
                                 });
-                                const tmp = ge.next(val);
+                                let tmp;
+                                try {
+                                    if(isError) {
+                                        tmp = ge.throw(e);
+                                    } else {
+                                        tmp = ge.next(val);
+                                    }
+                                } catch (e) {
+                                    return runGen(ge, null, true, e);
+                                }
                                 doUpdate(_this, _state);
                                 if (tmp.done) {
                                     return tmp.value;
                                 }
                                 if (tmp.value && tmp.value.then) {
                                     return tmp.value.then(data => {
-                                        return runGen(ge, data)
+                                        return runGen(ge, data, false, null)
                                     }).catch(e => {
-                                        ge.throw(e);
-                                        doUpdate(_this, _state);
-                                        runGen(ge, null);
+                                        return runGen(ge, null, true, e);
                                     });
                                 }
-                                return runGen(ge, tmp.value);
+                                return runGen(ge, tmp.value, false, null);
                             };
-                            return Promise.resolve().then(() => runGen(origin.bind(_this)(...params), null));
+                            return Promise.resolve().then(() => runGen(origin.bind(_this)(...params), null, false, null));
                         }
                         const state = _store.getState()[ns];
                         let _state = {};
