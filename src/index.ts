@@ -71,7 +71,8 @@ export function deliver(namespace: string|Function): Function {
                                         tmp = ge.next(val);
                                     }
                                 } catch (e) {
-                                    return runGen(ge, null, true, e);
+                                    doUpdate(_this, _state);
+                                    throw e;
                                 }
                                 doUpdate(_this, _state);
                                 if (tmp.done) {
