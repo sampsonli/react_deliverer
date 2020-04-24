@@ -72,7 +72,8 @@ export function deliver(namespace: string|Function): Function {
                                     }
                                 } catch (e) {
                                     doUpdate(_this, _state);
-                                    throw e;
+                                    ge.throw(e);
+                                    // throw e;
                                 }
                                 doUpdate(_this, _state);
                                 if (tmp.done) {
@@ -114,6 +115,21 @@ export function deliver(namespace: string|Function): Function {
                     }
                 }
             });
+            prototype.setData = function(props) {
+                const state = _store.getState()[ns];
+                const keys = Object.keys(props)
+                if(keys.some(key => props[key] !== state[key])){
+                    keys.forEach(key => {
+                        if(!mapReverse[key]) { // add new props
+                            mapReverse[key] = key;
+                            map[key] = key
+                        }
+                    });
+                    const _state = {...state, ...props};
+                    _store.dispatch({type: `deliver/${ns}`, payload: _state});
+                }
+
+            }
             prototype.useData = function (prop = null) {
                 if (useState && useEffect) {
                     const [data, setData] = useState('__UNINITED__');
