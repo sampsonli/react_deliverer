@@ -8,6 +8,7 @@ react+redux 组合已经是目前主流开发模式， 但是使用原生redux�
 3. 原生redux开发可读性差， 对于新手很难理解里面的操作逻辑
 4. 开发的时候，修改action,reducer里面的内容很难保留老数据，大部分都情况下都要刷新页面
 5. 使用redux 很难做类型检测， 自动代码提示功能很弱
+6. 更方便拆分视图和业务层， 更好的多人协作
 
 ## react-deliverer 解决的问题
 1. 模块化
@@ -356,7 +357,9 @@ export default new Demo2('demo4');
 		* selector 为方法， selector 返回模块中的属性， 参数是当前模块
 		* selector 为字符串， 返回模块某个字段
 	3. reset() 辅助方法， 用来恢复当前模块初始值
+	4. setData() 批量修改属性， 类似于setState()方法
 	
 ### 最佳实践
->react 组件/页面 开发基于function+hooks， 数据模型基于class， 而react-deliverer 是一款比较成熟的数据模型管理库， 解决了基于redux 开发一系列痛点。
+1. react 组件/页面 开发基于function+hooks， 数据模型基于class， 而react-deliverer 是一款比较成熟的数据模型管理库， 解决了基于redux 开发一系列痛点。
+2. 数据处理与页面展示分离， 组件内尽量不要写业务代码， model 只对外提供api文档， view层只需要设计页面，展示数据， 事件注册即可， 实现前端部分更进一步细分， 更高效多人协作完成需求。 
 	

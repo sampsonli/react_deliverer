@@ -50,7 +50,11 @@ export function deliver(namespace: string|Function): Function {
             prototype.ns = ns;
             const _prototype = Object.create(instance);
             _prototype.ns = ns;
-            Object.getOwnPropertyNames(Clazz.prototype).forEach(key => {
+            let superProps = [];
+            if(Object.getPrototypeOf(Clazz) !== Function.prototype) {
+                superProps = Object.getOwnPropertyNames(Object.getPrototypeOf(Clazz).prototype)
+            }
+            [...superProps, ...Object.getOwnPropertyNames(Clazz.prototype)].forEach(key => {
                 if (key !== 'constructor' && typeof Clazz.prototype[key] === 'function') {
                     const origin = Clazz.prototype[key];
                     prototype[key] = function (...params) {
