@@ -351,15 +351,72 @@ class Demo4 {
 export default new Demo2('demo4');
 ~~~
 3. 模块实例方法/属性
-	1. ns 模块导出来具有ns属性， 值是模块命名空间名
+	1. ns 模块导出来具有ns属性， 值是模块命名空间名子
 	2. useData(selector) // 只有高版本react可用
 		* selector 为空， 返回值是模块对应的state
 		* selector 为方法， selector 返回模块中的属性， 参数是当前模块
 		* selector 为字符串， 返回模块某个字段
 	3. reset() 辅助方法， 用来恢复当前模块初始值
-	4. setData() 批量修改属性， 类似于setState()方法
+	4. setData() 批量修改属性， 用法类似于setState()方法
+	5. getData() 获取model中保存在store中的数据， 通常用于多个模块之间数据共享
 	
 ### 最佳实践
-1. react 组件/页面 开发基于function+hooks， 数据模型基于class， 而react-deliverer 是一款比较成熟的数据模型管理库， 解决了基于redux 开发一系列痛点。
-2. 数据处理与页面展示分离， 组件内尽量不要写业务代码， model 只对外提供api文档， view层只需要设计页面，展示数据， 事件注册即可， 实现前端部分更进一步细分， 更高效多人协作完成需求。 
-	
+1. 模块之间数据共享，通常多模块之间会有数据/方法交互，可以通过模块相互导入实现， 获取模块中数据不能从导出的模块直接获取， 而是需要调用模块的getData()方法来获取数据。
+比如： 
+    ~~~javascript
+    // a.js
+    @deliver('a')
+    class A {
+      name = '张三';
+      setName(name) {
+        this.name = name;
+      }
+    }
+    export default new A();
+    
+    
+    // b.js
+    import aModel from 'a';
+    @deliver('b')
+    class B {
+      name = '李四';
+      setName(name) {
+        this.name = name;
+      }
+      getAName() {
+        const name = aModel.getData().name;
+        // const name = aModel.name; // 不能这么去获取A中的name的值
+        return name;
+        
+      }
+    }
+    export default new B();
+    ~~~
+2. 模块之间代码逻辑共享， 模块之间代码可以通过继承实现， 注意只能通过一层继承实现, 父类只能为纯class
+    ~~~javascript
+   // person.js
+   export default class Person { 
+       name = '张三';
+       age = 12;
+       setName(name) {
+           this.name = name;
+       }
+    }
+   // friend.js
+   import Person from './person';
+   @deliver('friend')
+   class Friend extends Person {
+       sex = 1;
+       setSex(sex) {
+           this.sex = sex;
+       }
+   }
+   export default new Friend();
+   
+   // Component.jsx
+   import friendModel from './friend';
+   //
+   firendModel.setName('王五');
+   ~~~
+3. react 组件/页面 开发基于function+hooks， 数据模型基于class， 而react-deliverer 是一款比较成熟的数据模型管理库， 解决了基于redux 开发一系列痛点。
+4. 数据处理与页面展示剥离开， 组件内尽量不要写业务代码， model 只对外提供api文档， view层只需要设计页面，展示数据， 事件注册即可， 实现前端部分更进一步细分， 更高效多人协作完成需求。 

@@ -32,10 +32,11 @@ export function deliver(namespace: string|Function): Function {
             const mapReverse = {};
 
             function doUpdate(newState, oldState) {
-                const diff = Object.keys(newState).some(key => newState[key] !== oldState[key]);
+                const keys = Object.keys(newState);
+                const diff = keys.some(key => newState[key] !== oldState[key]);
                 if (diff) {
                     const _newState = {};
-                    Object.keys(newState).forEach(key => {
+                    keys.forEach(key => {
                         if(!mapReverse[key]) { // add new props
                             mapReverse[key] = key;
                             map[key] = key
