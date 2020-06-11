@@ -181,6 +181,14 @@ export function deliver(namespace: string|Function): Function {
             };
 
             /**
+             * 获取model保存在store中的数据
+             */
+            prototype.getData = function () {
+                const rootState = _store.getState();
+                return rootState[ns]
+            };
+
+            /**
              * 重置模块数据到初始状态， 一般用于组件销毁的时候调用
              */
             prototype.reset = function () {
