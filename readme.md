@@ -4,7 +4,7 @@ react-deliverer 是一个react+redux模块化管理工具， 基于redux 进一�
 ## 为什么使用 react-deliverer?
 react+redux 组合已经是目前主流开发模式， 但是使用原生redux开发会遇到很多痛点
 1. 组件很容易做成按需加载，而action,reducer 不太方便做成异步加载， 意味着假如一个很大的应用，用户只访问一个页面， 会把很多没必要的业务代码一次性加载进来， 导致页面加载缓慢
-2. 使用原生redux开发，需要定义很多常量，还有多个文件， 文件来回切换比较繁琐， 而且维护起来非常麻烦
+2. 使用原生redux开发，需要维护大量常量，还有多个文件， 文件来回切换比较繁琐， 而且维护起来非常麻烦
 3. 原生redux开发可读性差， 对于新手很难理解里面的操作逻辑
 4. 开发的时候，修改action,reducer里面的内容很难保留老数据，大部分都情况下都要刷新页面
 5. 使用redux 很难做类型检测， 自动代码提示功能很弱
@@ -19,7 +19,6 @@ react+redux 组合已经是目前主流开发模式， 但是使用原生redux�
 6. 可读性强
 7. 完美支持ts开发， 拥有完善的自动代码提示
 8. 兼容老版本浏览器（保证react+redux版本同时支持）
-9. 热更新数据保留
 
 ## 参考项目
 相关使用方法可以参考
@@ -321,36 +320,36 @@ class HomeModel {
 ## Api接口说明
 
 1. deliverer(store, asyncReducers)
-* store: redux全局唯一实例
-* asyncReducers: 其他reducer， 方便与其他库一起集成（可以不传）
+    * store: redux全局唯一实例
+    * asyncReducers: 其他reducer， 方便与其他库一起集成（可以不传）
 2. 注解deliver 
-> 此注解实现了两个功能， 给模块设置命名空间，注册model到redux中， 给模块命名有如下用法
-~~~javascript
-// 1.
-@deliver
-class Demo1 {
-	ns = 'demo1';
-}
-export default new Demo1();
-// 2.
-@deliver('demo2')
-class Demo2 {
-}
-export default new Demo2();
-// 3. 
-@deliver
-class Demo3 {
-}
-export default new Demo2('demo3'); // 底层已经帮你赋值了
-@deliver
-class Demo4 {
-    constructor(ns) {
-        this.ns = ns;
+    > 此注解实现了两个功能， 给模块设置命名空间，注册model到redux中， 给模块命名有如下用法
+    ~~~javascript
+    // 1.
+    @deliver
+    class Demo1 {
+        ns = 'demo1';
     }
-}
-export default new Demo2('demo4');
-~~~
-3. 模块实例方法/属性
+    export default new Demo1();
+    // 2.
+    @deliver('demo2')
+    class Demo2 {
+    }
+    export default new Demo2();
+    // 3. 
+    @deliver
+    class Demo3 {
+    }
+    export default new Demo2('demo3'); // 底层已经帮你赋值了
+    @deliver
+    class Demo4 {
+        constructor(ns) {
+            this.ns = ns;
+        }
+    }
+    export default new Demo2('demo4');
+    ~~~
+3. 模块扩展实例方法/属性
 	1. ns 模块导出来具有ns属性， 值是模块命名空间名子
 	2. useData(selector) // 只有高版本react可用
 		* selector 为空， 返回值是模块对应的state
@@ -359,7 +358,7 @@ export default new Demo2('demo4');
 	3. reset() 辅助方法， 用来恢复当前模块初始值
 	4. setData() 批量修改属性， 用法类似于setState()方法
 	5. getData() 获取model中保存在store中的数据， 通常用于多个模块之间数据共享
-	
+4. 定义模块类方法/属性名时候， 尽量避免使用setData,useData,reset，getData关键词
 ### 最佳实践
 1. 模块之间数据共享，通常多模块之间会有数据/方法交互，可以通过模块相互导入实现， 获取模块中数据不能从导出的模块直接获取， 而是需要调用模块的getData()方法来获取数据。
 比如： 

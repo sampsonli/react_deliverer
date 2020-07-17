@@ -140,6 +140,7 @@ export function deliver(namespace: string|Function): Function {
                 }
 
             }
+            _prototype.setData = prototype.setData;
             /**
              * react hooks写法获取模块中数据
              * @param prop 可以为 字符串：模块中某个属性，方法：模块属性选择器， 空：整个模块数据
@@ -220,6 +221,28 @@ export function deliver(namespace: string|Function): Function {
     return Target
 }
 
+/**
+ * 通过hook方式获取模块中数据
+ * @param ns 模块名称
+ */
+export const useData = (ns: string) => {
+    if (useState && useEffect) {
+        const [data, setData] = useState('__UNINITED__');
+        useEffect(() => {
+            return _store.subscribe(() => {
+                const rootState = _store.getState();
+                setData(rootState[ns])
+            });
+        }, []);
+        if (data === '__UNINITED__') {
+            const rootState = _store.getState();
+            return rootState[ns]
+        }
+        return data
+    } else {
+        throw new Error('Your react version is too lower, please upgrade your react!')
+    }
+}
 
 export default (store, asyncReducers = {}) => {
     _store = store;
