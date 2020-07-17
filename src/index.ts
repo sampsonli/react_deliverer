@@ -1,5 +1,6 @@
 import {combineReducers} from 'redux';
 import {useState, useEffect} from 'react';
+
 declare var Promise
 
 let _store;
@@ -16,15 +17,15 @@ function injectReducer(key, reducer) {
     }
 }
 
-export function deliver(namespace: string|Function): Function {
-    const Target =  function (Clazz) {
+export function deliver(namespace: string | Function): Function {
+    const Target = function (Clazz) {
         return function (...args) { // constructor
             const instance = new Clazz(...args);
-            if(args && typeof args[0] === 'string') {
+            if (args && typeof args[0] === 'string') {
                 instance.ns = instance.ns || args[0];
             }
             const ns = instance.ns || namespace;
-            if(!ns) {
+            if (!ns) {
                 throw new Error("please define 'ns' before")
             }
             delete instance.ns;
@@ -37,7 +38,7 @@ export function deliver(namespace: string|Function): Function {
                 if (diff) {
                     const _newState = {};
                     keys.forEach(key => {
-                        if(!mapReverse[key]) { // add new props
+                        if (!mapReverse[key]) { // add new props
                             mapReverse[key] = key;
                             map[key] = key
                         }
@@ -52,7 +53,7 @@ export function deliver(namespace: string|Function): Function {
             const _prototype = Object.create(instance);
             _prototype.ns = ns;
             let superProps = [];
-            if(Object.getPrototypeOf(Clazz) !== Function.prototype) {
+            if (Object.getPrototypeOf(Clazz) !== Function.prototype) {
                 superProps = Object.getOwnPropertyNames(Object.getPrototypeOf(Clazz).prototype)
             }
             [...superProps, ...Object.getOwnPropertyNames(Clazz.prototype)].forEach(key => {
@@ -70,7 +71,7 @@ export function deliver(namespace: string|Function): Function {
                                 });
                                 let tmp;
                                 try {
-                                    if(isError) {
+                                    if (isError) {
                                         tmp = ge.throw(e);
                                     } else {
                                         tmp = ge.next(val);
@@ -102,7 +103,7 @@ export function deliver(namespace: string|Function): Function {
                             _state[map[_key]] = state[_key];
                         });
                         const result = origin.bind(_this)(...params);
-                        if(result && typeof result.then === 'function') {
+                        if (result && typeof result.then === 'function') {
                             doUpdate(_this, _state);
                             _state = {..._this};
                             return result.then(data => {
@@ -125,12 +126,12 @@ export function deliver(namespace: string|Function): Function {
              * 设置模块数据
              * @param props， 要设置属性的集合， 为普通对象，比如 {a: 1, b:2}, 代表设置模块中a属性为1， b属性为2
              */
-            prototype.setData = function(props) {
+            prototype.setData = function (props) {
                 const state = _store.getState()[ns];
                 const keys = Object.keys(props)
-                if(keys.some(key => props[key] !== state[key])){
+                if (keys.some(key => props[key] !== state[key])) {
                     keys.forEach(key => {
-                        if(!mapReverse[key]) { // add new props
+                        if (!mapReverse[key]) { // add new props
                             mapReverse[key] = key;
                             map[key] = key
                         }
@@ -147,35 +148,22 @@ export function deliver(namespace: string|Function): Function {
              */
             prototype.useData = function (prop = null) {
                 if (useState && useEffect) {
-                    const [data, setData] = useState('__UNINITED__');
+                    const [data, setData] = useState(() => _store.getState()[ns]);
                     useEffect(() => {
                         return _store.subscribe(() => {
                             const rootState = _store.getState();
-                            if(!prop || !rootState[ns]) {
+                            if (!prop || !rootState[ns]) {
                                 return setData(rootState[ns])
                             }
-                            if(typeof prop === 'function') {
+                            if (typeof prop === 'function') {
                                 return setData(prop(rootState[ns]))
                             }
-                            if(typeof prop === 'string'){
+                            if (typeof prop === 'string') {
                                 return setData(rootState[ns][prop])
                             }
                             setData(rootState[ns])
                         });
                     }, []);
-                    if (data === '__UNINITED__') {
-                        const rootState = _store.getState();
-                        if(!prop || !rootState[ns]) {
-                            return rootState[ns]
-                        }
-                        if(typeof prop === 'function') {
-                            return prop(rootState[ns])
-                        }
-                        if(typeof prop === 'string'){
-                            return rootState[ns][prop]
-                        }
-                        return rootState[ns]
-                    }
                     return data
                 } else {
                     throw new Error('Your react version is too lower, please upgrade your react!')
@@ -215,7 +203,7 @@ export function deliver(namespace: string|Function): Function {
             return Object.create(prototype);
         };
     };
-    if(typeof namespace === "function") {
+    if (typeof namespace === "function") {
         return Target(namespace)
     }
     return Target
@@ -227,17 +215,12 @@ export function deliver(namespace: string|Function): Function {
  */
 export const useData = (ns: string) => {
     if (useState && useEffect) {
-        const [data, setData] = useState('__UNINITED__');
+        const [data, setData] = useState(() => _store.getState()[ns]);
         useEffect(() => {
             return _store.subscribe(() => {
-                const rootState = _store.getState();
-                setData(rootState[ns])
+                setData(_store.getState()[ns]);
             });
         }, []);
-        if (data === '__UNINITED__') {
-            const rootState = _store.getState();
-            return rootState[ns]
-        }
         return data
     } else {
         throw new Error('Your react version is too lower, please upgrade your react!')
