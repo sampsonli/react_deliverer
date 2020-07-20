@@ -148,7 +148,19 @@ export function deliver(namespace: string | Function): Function {
              */
             prototype.useData = function (prop = null) {
                 if (useState && useEffect) {
-                    const [data, setData] = useState(() => _store.getState()[ns]);
+                    const [data, setData] = useState(() => {
+                        const rootState = _store.getState();
+                        if (!prop || !rootState[ns]) {
+                            return rootState[ns];
+                        }
+                        if (typeof prop === 'function') {
+                            return prop(rootState[ns]);
+                        }
+                        if (typeof prop === 'string') {
+                            return rootState[ns][prop];
+                        }
+                       return  _store.getState()[ns]
+                    });
                     useEffect(() => {
                         return _store.subscribe(() => {
                             const rootState = _store.getState();
