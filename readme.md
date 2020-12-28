@@ -1,4 +1,6 @@
 # react-deliverer 拯救者
+## 说明
+***此包不再维护， 有更好的替代， [redux-spring](https://github.com/sampsonli/redux-spring)***
 ## What is react-deliverer?
 react-deliverer 是一个react+redux模块化管理工具， 基于redux 进一步封装， 更方便使用， 同时结构更清晰
 ## 为什么使用 react-deliverer?
